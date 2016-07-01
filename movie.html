@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Movie Search</title>
+	<style type="text/css">
+	    body{
+	    	background-image: url("peanuts.jpg");
+	    	background-size: cover;
+	    	background-repeat: repeat;
+	    }
+	    p{
+	    	font-family: candara;
+	    	font-size: 22px;
+	    }
+		.search{
+			margin-left: 10px;
+            background-color: black;
+            height:50px;
+            width: 200px;
+            color: white;
+            font-size :18px;
+            text-align: center;
+            position: absolute;
+		}
+		#details{
+			height:400px;
+			width:600px;
+			border: 1px solid black;
+			margin-top: 130px;
+			background-color:white;
+			position :absolute;
+			margin-left: 450px;
+			visibility:hidden;
+		}
+		#reset{
+			margin-left: 300px;
+			margin-top: 65px;
+		}
+		.button{
+			background-color: orange;
+			height: 35px;
+			padding-top: 10px;
+			text-align: center;
+			width: 100px;
+			font-size: 20px;
+			font-family: candara;
+			border-radius: 5px;
+			cursor: pointer;
+			position: absolute;
+		}
+		#poster{
+			height:500px;
+			width:400px;
+			margin-top: 130px;
+			position: absolute;
+			margin-left: 10px;
+			visibility: hidden;
+		}
+		#comparison{
+			height:300px;
+			width:500px;
+			border: 1px solid black;
+			background-color:white;
+			position :absolute;
+			margin-left: 20px;
+			margin-top:750px;
+			/*visibility: hidden;*/
+		}
+		#compare{
+			margin-left: 1070px;
+			margin-top: 690px;
+		}
+		h4{
+			font-family: Franklin Gothic Medium;
+		}
+	</style>
+</head>
+<body>
+    <h4 style="color:#ff0000;font-size:30px;margin-top:10px;position:absolute; margin-left:20px;">Search for movies,TV shows or games</h4>
+	<input class="search" style="margin-top:60px;" placeholder="Search" id="search"></input>
+	<img src="search.png" onclick="submit()"  style="height:35px;width:35px; cursor:pointer; display:inline-block; margin-top:70px; margin-left:220px;position:absolute;"/>
+	<div id="reset" class="button" onclick="reset()">Reset</div>
+    <img src="lifeofpi.jpg" class="showcase" style="z-index:10;margin-left: 20px; margin-top: 140px;position:absolute;"/>
+    <img src="sherlock.jpg" class="showcase" style="z-index:10;margin-left: 350px; margin-top: 140px;position:absolute;"/>
+    <img src="tlou.jpg" class="showcase" style="z-index:10;margin-left: 680px; margin-top: 140px;position:absolute;"/>
+    <img src="avatar.jpg" class="showcase" style="z-index:10;margin-left: 1020px; margin-top: 140px;position:absolute;"/>
+	<div id="poster"></div>
+	<div id="details"></div>
+	<h4 style="color:#ff0000;font-size:30px;margin-top:630px;position:absolute; margin-left:20px;">Compare movies,TV shows or games</h4>
+	<input class="search" style="margin-top:680px;" placeholder="Compare" id="movie1"></input>
+	<input class="search" style="margin-top:680px; margin-left:220px;" placeholder="Compare" id="movie2"></input>
+	<input class="search" style="margin-top:680px; margin-left:430px;" placeholder="Compare" id="movie3"></input>
+	<input class="search" style="margin-top:680px; margin-left:640px;" placeholder="Compare" id="movie4"></input>
+	<input class="search" style="margin-top:680px; margin-left:850px;" placeholder="Compare" id="movie5"></input>
+	<div id="compare" class="button" onclick="compare()">Compare</div>
+	<div id="comparison"></div>
+	<br>
+	<script>
+	    var i=0,url,k=0;
+	    var search;
+	    var searchInput = document.getElementById("search");
+	    var details = document.getElementById("details");
+	    var poster =  document.getElementById("poster");
+	    var showcase = document.getElementsByClassName("showcase");
+	    var searchItems = document.getElementsByClassName("search");
+	    var responses=[];
+	    var comparison = document.getElementById("comparison");
+		function submit(){
+		    search = searchInput.value;
+		    url = "http://www.omdbapi.com/?t=";
+			for(i=0;i<search.length;i++)
+			{
+				if(search[i]==' ')
+					url+='+';
+				else
+			        url+=search[i];
+			}
+			url+='&r=json';
+			var xhr = new XMLHttpRequest();
+	        xhr.onreadystatechange=function() {
+            if(xhr.readyState==4&&xhr.status==200){
+               show(xhr.responseText);
+            }
+        }
+		xhr.open("GET",url,true);
+		xhr.send();
+		}
+		function show(response)
+		{
+			for(i=0;i<showcase.length;i++)
+		        showcase[i].style.visibility="hidden";
+		  details.style.visibility="visible";
+		  poster.style.visibility="visible";
+		  var arr = JSON.parse(response);
+          var body,image;
+          image="<img src='"+arr.Poster+"'/>";
+          body="<p>&nbsp;&nbsp;Title : "+arr.Title+"</p><p>&nbsp;&nbsp;Release Date : "+arr.Released+"</p><p>&nbsp;&nbsp;Genre : "+arr.Genre+"</p><p>&nbsp;&nbsp;Actors : "+arr.Actors+"</p><p>&nbsp;&nbsp;Awards : "+arr.Awards+"</p><p>&nbsp;&nbsp;IMDb Rating : "+arr.imdbRating+"</p>";
+          details.innerHTML = body;
+          poster.innerHTML=image;
+		}
+		function reset(){
+			for(i=0;i<searchItems.length;i++)
+			    searchItems[i].value="";
+			poster.style.visibility="hidden";
+			details.style.visibility="hidden";
+		}
+		function compare(){
+			var urls=[];
+			var movie=[];
+            movie[0]=document.getElementById("movie1").value;
+            movie[1]=document.getElementById("movie2").value;
+            movie[2]=document.getElementById("movie3").value;
+            movie[3]=document.getElementById("movie4").value;
+            movie[4]=document.getElementById("movie5").value;
+            for(i=0;i<5;i++){
+            	urls[i]="http://www.omdbapi.com/?t=";
+            }
+			for(i=0;i<movie.length;i++)
+			{
+				for(j=0;j<movie[i].length;j++)
+				{
+					if(movie[i][j]==' ')
+					   urls[i]+='+';
+				    else
+			           urls[i]+=movie[i][j];
+				}
+				urls[i]+="&r=json";
+			}
+			alert(urls[0]);
+			var xhrs1,xhrs2,xhrs3,xhrs4,xhrs5 ;
+		    xhrs1 = new XMLHttpRequest();
+	        xhrs1.onreadystatechange=function() {
+            if(xhrs1.readyState==4&&xhrs1.status==200){
+               count(xhrs1.responseText);
+            }
+            }
+		    xhrs1.open("GET",urls[0],true);
+		    xhrs1.send();
+		    xhrs2 = new XMLHttpRequest();
+	        xhrs2.onreadystatechange=function() {
+            if(xhrs2.readyState==4&&xhrs2.status==200){
+               count(xhrs2.responseText);
+            }
+            }
+		    xhrs2.open("GET",urls[1],true);
+		    xhrs2.send();
+		    xhrs3 = new XMLHttpRequest();
+	        xhrs3.onreadystatechange=function() {
+            if(xhrs3.readyState==4&&xhrs3.status==200){
+               count(xhrs3.responseText);
+            }
+            }
+		    xhrs3.open("GET",urls[2],true);
+		    xhrs3.send();
+		    xhrs4 = new XMLHttpRequest();
+	        xhrs4.onreadystatechange=function() {
+            if(xhrs4.readyState==4&&xhrs4.status==200){
+               count(xhrs4.responseText);
+            }
+            }
+		    xhrs4.open("GET",urls[3],true);
+		    xhrs4.send();
+		    xhrs5 = new XMLHttpRequest();
+	        xhrs5.onreadystatechange=function() {
+            if(xhrs5.readyState==4&&xhrs5.status==200){
+               count(xhrs5.responseText);
+            }
+            }
+		    xhrs5.open("GET",urls[4],true);
+		    xhrs5.send();
+		}
+		function count(res){
+			responses[k]=res;
+			k++;
+			if(k==5)
+				showComparison(responses)
+		}
+		function showComparison(resp)
+		{
+			var arrResp = [];
+			var pos,big,t=0;
+			var b=[];
+			arrResp[0] = JSON.parse(resp[0]);
+			arrResp[1] = JSON.parse(resp[1]);
+			arrResp[2] = JSON.parse(resp[2]);
+			arrResp[3] = JSON.parse(resp[3]);
+			arrResp[4] = JSON.parse(resp[4]);
+            var a = [arrResp[0].imdbRating,arrResp[1].imdbRating,arrResp[2].imdbRating,arrResp[3].imdbRating,arrResp[4].imdbRating];
+            for(j=0;j<5;j++)
+            {
+            big=a[j];
+            pos=j;
+            for(i=j;i<5;i++)
+            {
+               if(a[i]>big)
+               {
+               	big=a[i];
+               	pos=i;
+               }
+            }
+            var temp;
+            temp=a[j];
+            a[j]=a[pos];
+            a[pos]=temp;
+            for(i=0;i<5;i++)
+            {
+            	if(arrResp[i].imdbRating==a[j])
+            	{
+            		b[t]=i;
+            	    t++;
+            	}
+            }
+            }
+            comparison.style.visibility="visible";
+            var body="<p>&nbsp;&nbsp;"+arrResp[b[0]].Title+"</p>"+"<p>&nbsp;&nbsp;"+arrResp[b[1]].Title+"</p>"+"<p>&nbsp;&nbsp;"+arrResp[b[2]].Title+"</p>"+"<p>&nbsp;&nbsp;"+arrResp[b[3]].Title+"</p>"+"<p>&nbsp;&nbsp;"+arrResp[b[4]].Title+"</p>";
+            comparison.innerHTML=body;
+  		}
+	</script>
+</body>
