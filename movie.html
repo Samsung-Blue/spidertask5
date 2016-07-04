@@ -33,7 +33,7 @@
 			visibility:hidden;
 		}
 		#reset{
-			margin-left: 300px;
+			margin-left: 500px;
 			margin-top: 65px;
 		}
 		.button{
@@ -64,7 +64,7 @@
 			position :absolute;
 			margin-left: 20px;
 			margin-top:750px;
-			/*visibility: hidden;*/
+			visibility: hidden;
 		}
 		#compare{
 			margin-left: 1070px;
@@ -77,13 +77,14 @@
 </head>
 <body>
     <h4 style="color:#ff0000;font-size:30px;margin-top:10px;position:absolute; margin-left:20px;">Search for movies,TV shows or games</h4>
-	<input class="search" style="margin-top:60px;" placeholder="Search" id="search"></input>
-	<img src="search.png" onclick="submit()"  style="height:35px;width:35px; cursor:pointer; display:inline-block; margin-top:70px; margin-left:220px;position:absolute;"/>
+	<input class="search" style="margin-top:60px;" placeholder="Search By Title" id="search"></input>
+	<input class="search" style="margin-top:60px; margin-left:230px;" placeholder="Search By IMDB ID" id="searchId"></input>
+	<img src="search.png" onclick="submit()"  style="height:35px;width:35px; cursor:pointer; display:inline-block; margin-top:70px; margin-left:440px;position:absolute;"/>
 	<div id="reset" class="button" onclick="reset()">Reset</div>
-    <img src="lifeofpi.jpg" class="showcase" style="z-index:10;margin-left: 20px; margin-top: 140px;position:absolute;"/>
-    <img src="sherlock.jpg" class="showcase" style="z-index:10;margin-left: 350px; margin-top: 140px;position:absolute;"/>
-    <img src="tlou.jpg" class="showcase" style="z-index:10;margin-left: 680px; margin-top: 140px;position:absolute;"/>
-    <img src="avatar.jpg" class="showcase" style="z-index:10;margin-left: 1020px; margin-top: 140px;position:absolute;"/>
+    <img src="lifeofpi.jpg" class="showcase" onclick="movie(1)" style="z-index:10;margin-left: 20px; margin-top: 140px;position:absolute;cursor:pointer;"/>
+    <img src="sherlock.jpg" class="showcase" onclick="movie(2)" style="z-index:10;margin-left: 350px; margin-top: 140px;position:absolute;cursor:pointer;"/>
+    <img src="tlou.jpg" class="showcase" onclick="movie(3)" style="z-index:10;margin-left: 680px; margin-top: 140px;position:absolute;cursor:pointer;"/>
+    <img src="avatar.jpg" class="showcase" onclick="movie(4)" style="z-index:10;margin-left: 1020px; margin-top: 140px;position:absolute;cursor:pointer;"/>
 	<div id="poster"></div>
 	<div id="details"></div>
 	<h4 style="color:#ff0000;font-size:30px;margin-top:630px;position:absolute; margin-left:20px;">Compare movies,TV shows or games</h4>
@@ -94,11 +95,13 @@
 	<input class="search" style="margin-top:680px; margin-left:850px;" placeholder="Compare" id="movie5"></input>
 	<div id="compare" class="button" onclick="compare()">Compare</div>
 	<div id="comparison"></div>
+
 	<br>
 	<script>
-	    var i=0,url,k=0;
-	    var search;
+	    var i=0,url,k=0,counter=1;
+	    var searchT,searchI;
 	    var searchInput = document.getElementById("search");
+	    var searchId = document.getElementById("searchId");
 	    var details = document.getElementById("details");
 	    var poster =  document.getElementById("poster");
 	    var showcase = document.getElementsByClassName("showcase");
@@ -106,25 +109,41 @@
 	    var responses=[];
 	    var comparison = document.getElementById("comparison");
 		function submit(){
-		    search = searchInput.value;
-		    url = "http://www.omdbapi.com/?t=";
-			for(i=0;i<search.length;i++)
-			{
-				if(search[i]==' ')
-					url+='+';
-				else
-			        url+=search[i];
-			}
-			url+='&r=json';
-			var xhr = new XMLHttpRequest();
-	        xhr.onreadystatechange=function() {
-            if(xhr.readyState==4&&xhr.status==200){
-               show(xhr.responseText);
+		    searchT = searchInput.value;
+		    searchI = searchId.value;
+		    if(searchI==""){
+		      url = "http://www.omdbapi.com/?t=";
+			  for(i=0;i<searchT.length;i++)
+			  {
+				  if(searchT[i]==' ')
+					 url+='+';
+				  else
+			         url+=searchT[i];
+			  }
+			  url+='&r=json';
+			  var xhr = new XMLHttpRequest();
+	          xhr.onreadystatechange=function() {
+                if(xhr.readyState==4&&xhr.status==200){
+                   show(xhr.responseText);
+                }
             }
-        }
-		xhr.open("GET",url,true);
-		xhr.send();
+		    xhr.open("GET",url,true);
+		    xhr.send();
+	    }
+	    else{
+	    	url = "http://www.omdbapi.com/?i=";
+	    	url+=searchI;
+	    	url+="&r=json";
+	    	var xhr = new XMLHttpRequest();
+	          xhr.onreadystatechange=function() {
+                if(xhr.readyState==4&&xhr.status==200){
+                   show(xhr.responseText);
+                }
+            }
+		    xhr.open("GET",url,true);
+		    xhr.send();
 		}
+	    }
 		function show(response)
 		{
 			for(i=0;i<showcase.length;i++)
@@ -132,6 +151,11 @@
 		  details.style.visibility="visible";
 		  poster.style.visibility="visible";
 		  var arr = JSON.parse(response);
+		  if(arr.Response=="False"&&count==1){
+		  	searchId.value="";
+		  	count++;
+		  	submit();
+		  }
           var body,image;
           image="<img src='"+arr.Poster+"'/>";
           body="<p>&nbsp;&nbsp;Title : "+arr.Title+"</p><p>&nbsp;&nbsp;Release Date : "+arr.Released+"</p><p>&nbsp;&nbsp;Genre : "+arr.Genre+"</p><p>&nbsp;&nbsp;Actors : "+arr.Actors+"</p><p>&nbsp;&nbsp;Awards : "+arr.Awards+"</p><p>&nbsp;&nbsp;IMDb Rating : "+arr.imdbRating+"</p>";
@@ -139,14 +163,24 @@
           poster.innerHTML=image;
 		}
 		function reset(){
+			counter=1;
 			for(i=0;i<searchItems.length;i++)
 			    searchItems[i].value="";
 			poster.style.visibility="hidden";
 			details.style.visibility="hidden";
+			for(i=0;i<showcase.length;i++)
+				showcase[i].style.visibility="visible";
+		}
+		function count(res){
+			responses[k]=res;
+			k++;
+			if(k==5)
+				showComparison(responses)
 		}
 		function compare(){
 			var urls=[];
 			var movie=[];
+			k=0;
             movie[0]=document.getElementById("movie1").value;
             movie[1]=document.getElementById("movie2").value;
             movie[2]=document.getElementById("movie3").value;
@@ -166,10 +200,9 @@
 				}
 				urls[i]+="&r=json";
 			}
-			alert(urls[0]);
-			var xhrs1,xhrs2,xhrs3,xhrs4,xhrs5 ;
+			var xhrs1,xhrs2,xhrs3,xhrs4,xhrs5;
 		    xhrs1 = new XMLHttpRequest();
-	        xhrs1.onreadystatechange=function() {
+	        xhrs1.onreadystatechange=function(){
             if(xhrs1.readyState==4&&xhrs1.status==200){
                count(xhrs1.responseText);
             }
@@ -177,7 +210,7 @@
 		    xhrs1.open("GET",urls[0],true);
 		    xhrs1.send();
 		    xhrs2 = new XMLHttpRequest();
-	        xhrs2.onreadystatechange=function() {
+	        xhrs2.onreadystatechange=function(){
             if(xhrs2.readyState==4&&xhrs2.status==200){
                count(xhrs2.responseText);
             }
@@ -185,7 +218,7 @@
 		    xhrs2.open("GET",urls[1],true);
 		    xhrs2.send();
 		    xhrs3 = new XMLHttpRequest();
-	        xhrs3.onreadystatechange=function() {
+	        xhrs3.onreadystatechange=function(){
             if(xhrs3.readyState==4&&xhrs3.status==200){
                count(xhrs3.responseText);
             }
@@ -193,7 +226,7 @@
 		    xhrs3.open("GET",urls[2],true);
 		    xhrs3.send();
 		    xhrs4 = new XMLHttpRequest();
-	        xhrs4.onreadystatechange=function() {
+	        xhrs4.onreadystatechange=function(){
             if(xhrs4.readyState==4&&xhrs4.status==200){
                count(xhrs4.responseText);
             }
@@ -201,19 +234,13 @@
 		    xhrs4.open("GET",urls[3],true);
 		    xhrs4.send();
 		    xhrs5 = new XMLHttpRequest();
-	        xhrs5.onreadystatechange=function() {
+	        xhrs5.onreadystatechange=function(){
             if(xhrs5.readyState==4&&xhrs5.status==200){
                count(xhrs5.responseText);
             }
             }
 		    xhrs5.open("GET",urls[4],true);
 		    xhrs5.send();
-		}
-		function count(res){
-			responses[k]=res;
-			k++;
-			if(k==5)
-				showComparison(responses)
 		}
 		function showComparison(resp)
 		{
@@ -225,6 +252,16 @@
 			arrResp[2] = JSON.parse(resp[2]);
 			arrResp[3] = JSON.parse(resp[3]);
 			arrResp[4] = JSON.parse(resp[4]);
+			for(i=0;i<5;i++)
+			{
+				if(arrResp[i].Response=="False")
+					{
+                      arrResp[i].imdbRating=0;
+					}
+				else if(arrResp[i].imdbRating=="N/A"){
+					arrResp[i].imdbRating=0;
+				}
+			}
             var a = [arrResp[0].imdbRating,arrResp[1].imdbRating,arrResp[2].imdbRating,arrResp[3].imdbRating,arrResp[4].imdbRating];
             for(j=0;j<5;j++)
             {
@@ -252,8 +289,71 @@
             }
             }
             comparison.style.visibility="visible";
-            var body="<p>&nbsp;&nbsp;"+arrResp[b[0]].Title+"</p>"+"<p>&nbsp;&nbsp;"+arrResp[b[1]].Title+"</p>"+"<p>&nbsp;&nbsp;"+arrResp[b[2]].Title+"</p>"+"<p>&nbsp;&nbsp;"+arrResp[b[3]].Title+"</p>"+"<p>&nbsp;&nbsp;"+arrResp[b[4]].Title+"</p>";
+            var body="";
+            for(i=0;i<5;i++)
+            {
+            	if(arrResp[b[i]].imdbRating!=0){
+            		body+="<p>&nbsp;&nbsp;";
+            		body+=arrResp[b[i]].Title;
+            		body+=" : "
+            		body+=arrResp[b[i]].imdbRating;
+            		body+="</p>";
+            	}
+            }
             comparison.innerHTML=body;
+  		}
+  		function movie(i){
+  			switch(i)
+  			{
+  				case 1:{
+  					url = "http://www.omdbapi.com/?t=life+of+pi&r=json";
+  					var xhr=new XMLHttpRequest();
+  					xhr.onreadystatechange=function(){
+  						if(xhr.readyState==4&&xhr.status==200){
+  							show(xhr.responseText);
+  						}
+  					}
+  					xhr.open("GET",url,true);
+  					xhr.send();
+  					break;
+  				}
+  				case 2:{
+  					url = "http://www.omdbapi.com/?t=sherlock&r=json";
+  					var xhr=new XMLHttpRequest();
+  					xhr.onreadystatechange=function(){
+  						if(xhr.readyState==4&&xhr.status==200){
+  							show(xhr.responseText);
+  						}
+  					}
+  					xhr.open("GET",url,true);
+  					xhr.send();
+  					break;
+  				}
+  				case 3:{
+  					url = "http://www.omdbapi.com/?t=last+of+us&r=json";
+  					var xhr=new XMLHttpRequest();
+  					xhr.onreadystatechange=function(){
+  						if(xhr.readyState==4&&xhr.status==200){
+  							show(xhr.responseText);
+  						}
+  					}
+  					xhr.open("GET",url,true);
+  					xhr.send();
+  					break;
+  				}
+  				case 4:{
+  					url = "http://www.omdbapi.com/?t=avatar&r=json";
+  					var xhr=new XMLHttpRequest();
+  					xhr.onreadystatechange=function(){
+  						if(xhr.readyState==4&&xhr.status==200){
+  							show(xhr.responseText);
+  						}
+  					}
+  					xhr.open("GET",url,true);
+  					xhr.send();
+  					break;
+  				}
+  			}
   		}
 	</script>
 </body>
